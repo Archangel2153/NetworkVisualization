@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ping</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/other_stylesheet.css' %}">
+    </head>
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 50%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+    </style>
+    {% include "base.html" %}
+    <body>
+    <div class="content">
+
+        <h1>The ping script</h1>
+        <input id="run-script-btn" type="button" value="Run script">
+
+        <h3>Task progress</h3>
+        <div id="task-table"></div>
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $("#run-script-btn").click(function(e){
+        e.preventDefault()
+        $.ajax({
+        url: '/ping/runscript',
+        type: 'post',
+        data: { 'csrfmiddlewaretoken':"{{ csrf_token }}" },
+        success:function(){
+            loadTaskProgress()
+        }
+    });
+    })
+
+    function loadTaskProgress()
+    {
+        $.ajax({
+            type: "POST",
+            url: "/ping/getTasks",
+            data: { 'csrfmiddlewaretoken':"{{ csrf_token }}" },
+            success: function (res) {
+                var $task_table = $("#task-table");
+                var table_body = '<table>';
+                table_body += "<tr><th>Task name</th><th>Start time</th><th>attempts</th><th>Error</th><th>Finished</th></tr>"
+                res.data.forEach(e => {
+                    table_body += "<tr>"       
+                    table_body += "<td>" + e.task_name + "</td>"
+                    table_body += "<td>" + e.start + "</td>"
+                    table_body += "<td>" + e.attempts + "</td>"
+                    table_body += "<td>" +( e.has_error ? "Yes" : "No") + "</td>"
+                    table_body += "<td>" +( e.done ? "Yes" : "No") + "</td>"
+
+                    table_body += "</tr>"
+                });
+                table_body += '</table>'       
+                $("#task-table").html(table_body)         
+            }
+        });
+
+    }
+    loadTaskProgress()// Without delay first time
+    setInterval(loadTaskProgress, 3000) // in ms
+    </script>
+
+    </body>
+</html>

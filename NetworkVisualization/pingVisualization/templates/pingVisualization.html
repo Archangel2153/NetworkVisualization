@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ping Visualization</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/other_stylesheet.css' %}">
+        <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+    </head>
+    {% include "base.html" %}
+    <body>
+        <div class="content">
+            <h1>Ping visualization:</h1>
+
+            <form action="javascript:updateChart()">
+                <label>Choose a date time to filter:</label>
+                <select id="datetimefilter" name="datetimefilter">
+                    {% for dtf in datetimefilters %}
+                    <option value="{{dtf}}">{{dtf}}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Update">
+            </form>
+
+            <div id="container" style="width: 95%;">
+                <canvas id="ping-chart"></canvas>
+            </div>
+
+            <h1>Timeline visualization:</h1>
+            <form action="javascript:timelineChartFunction()">
+                <label>Choose a domain name to filter:</label>
+                <select class="js-example-basic-single" id="domainnamefilter" name="domainnamefilter" style="width: 180px;">
+                    {% for dmn in domainnamefilters %}
+                    <option value="{{dmn}}">{{dmn}}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Update">
+            </form>
+
+            <div id="timeline-container" style="width: 95%;">
+                <canvas id="ping-chart-timeline"></canvas>
+            </div>
+        </div>
+
+        <script>
+        var pingChart = undefined
+
+        var pingChartTimeline = undefined
+
+        function updateChart(){
+            var $chart = $("#ping-chart");
+        $.ajax({
+            type: "POST",
+            url: "/ping/getPingData",
+            data: {  'csrfmiddlewaretoken':"{{ csrf_token }}",
+                    'datetimefilter': $("#datetimefilter").val() },
+        success: function (payload) {
+            labels = []
+            dataset = {"min_rtt" : [] , "avg_rtt":[] , "max_rtt" : []}
+            payload.data.forEach(el =>
+                {
+                    labels.push(el.domain_name)
+                    dataset["min_rtt"].push(el.min_rtt)
+                    dataset["avg_rtt"].push(el.avg_rtt)
+                    dataset["max_rtt"].push(el.max_rtt)
+                }
+            )
+
+            var ctx = $chart[0].getContext("2d");
+
+            if(typeof pingChart !== 'undefined')
+            {
+                pingChart.destroy()
+            }
+            pingChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                label: 'min-rtt (ms)',
+                backgroundColor: 'rgb(153,204,0)',
+                data: dataset['min_rtt']
+                },
+                {
+                label: 'avg-rtt (ms)',
+                backgroundColor: 'rgb(255,153,0)',
+                data: dataset['avg_rtt']
+                },
+                {
+                label: 'max-rtt (ms)',
+                backgroundColor: 'rgb(255,0,0)',
+                data: dataset['max_rtt']
+                }]
+            },
+            options: {
+                scales:{
+                    x: {stacked: true},
+                    y: {stacked: true}
+                },
+                responsive: true,
+                legend: {
+                position: 'top',
+                },
+                title: {
+                display: true,
+                text: 'min-rtt'
+                }
+            }
+            });
+        }
+        });
+        }
+
+        function timelineChartFunction(){
+
+            var $chartTimeline = $("#ping-chart-timeline");
+            $.ajax({
+                type: "POST",
+                url: "/ping/getTimelineData",
+                data: { 'csrfmiddlewaretoken':"{{ csrf_token }}",
+                        'domainnamefilter': $("#domainnamefilter").val() },
+                success: function (payloadTimeline) {
+                    labelsTL = []
+                    datasetTL = {"min_rtt" : [] , "avg_rtt":[] , "max_rtt" : []}
+
+                    payloadTimeline.data.forEach(el =>
+                        {
+                            labelsTL.push(el.ping_execution)
+                            datasetTL["min_rtt"].push(el.min_rtt)
+                            datasetTL["avg_rtt"].push(el.avg_rtt)
+                            datasetTL["max_rtt"].push(el.max_rtt)
+                        }
+                    )
+
+                    var ctx = $chartTimeline[0].getContext("2d");
+
+                    if(typeof pingChartTimeline !== 'undefined')
+                    {
+                        pingChartTimeline.destroy()
+                    }
+                    pingChartTimeline = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labelsTL,
+                        datasets: [{
+                        label: 'min-rtt (ms)',
+                        backgroundColor: 'green',
+                        borderColor: 'rgb(153,204,0)',
+                        data: datasetTL['min_rtt']
+                        },
+                        {
+                        label: 'avg-rtt (ms)',
+                        backgroundColor: 'orange',
+                        borderColor: 'rgb(255,153,0)',
+                        data: datasetTL['avg_rtt']
+                        },
+                        {
+                        label: 'max-rtt (ms)',
+                        backgroundColor: 'red',
+                        borderColor: 'rgb(255,0,0)',
+                        data: datasetTL['max_rtt']
+                        }]
+                    },
+                    options: {
+                        scales:{
+                            x: {stacked: true},
+                            y: {stacked: true}
+                        },
+                        responsive: true,
+                        legend: {
+                        position: 'top',
+                        },
+                        title: {
+                        display: true,
+                        text: 'min-rtt'
+                        }
+                    }
+                    });
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            updateChart();
+            timelineChartFunction();
+            $('.js-example-basic-single').select2();
+        });
+        </script>
+    </body>
+</html>
+

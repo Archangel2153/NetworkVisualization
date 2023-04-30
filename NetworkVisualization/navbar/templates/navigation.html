@@ -1,0 +1,23 @@
+{% load base_extras %}
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+<div id="topbar">
+    <div class="navbar">
+        <div class="navbar-side navbar-left"></div>
+        <div class="navbar-content">
+            <a class = "{% navactive request 'index' %}""  
+                href="{% url 'index' %}">Home</a>
+            <a class = "{% navactive request 'ping' %}""  
+                href="{% url 'ping' %}">Ping</a>
+            <a class = "{% navactive request 'traceroute' %}""  
+                href="{% url 'traceroute' %}">Traceroute</a>
+            <a class = "{% navactive request 'pingVisualization' %}""
+                href="{% url 'pingVisualization' %}">Ping visualization</a>
+            <a class = "{% navactive request 'mapVisualization' %}""
+                href="{% url 'mapVisualization' %}">Map</a>
+        </div>
+        <div class="navbar-side navbar-right"></div>
+    </div>
+</div>

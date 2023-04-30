@@ -1,0 +1,25 @@
+  .navbar {
+    background-color: rgb(78, 80, 82);
+    overflow: hidden;
+  }
+  
+  .navbar a {
+    float: left;
+    color: #fcf8f8;
+    text-align: center;
+    padding: 12px 14px;
+    text-decoration: none;
+    font-size: 19px;
+    font-family: Verdana, sans-serif;
+  }
+  
+  .navbar a:hover {
+    background-color: rgb(219, 219, 219);
+    color: rgb(20, 19, 19);
+  }
+  
+  /* Add a color to the active/current link */
+  .navbar a.active {
+    background-color: rgb(189, 190, 190);
+    color: #000000;
+  }

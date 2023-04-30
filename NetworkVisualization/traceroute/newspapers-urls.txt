@@ -1,0 +1,13 @@
+abcnews.go.com
+edition.cnn.com
+telegraph.co.uk
+straitstimes.com
+herald.co.zw
+aljazeera.com
+scmp.com
+chinadaily.com.cn
+globaltimes.cn
+google.com
+facebook.com
+baidu.com
+qq.com

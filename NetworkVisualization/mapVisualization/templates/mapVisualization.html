@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/other_stylesheet.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/css/ol.css" type="text/css">
+    <style>
+      .map {
+        height: 800px;
+        width: 100%;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/build/ol.js"></script>
+    <title>Map</title>
+  </head>
+    {% include "base.html" %}
+  <body>
+    <h1>Route Map</h1>
+    <form action="javascript:loadMap()">
+      <label>Choose a date time to filter:</label>
+      <select id="datetimefilter" name="datetimefilter">
+          {% for dtf in datetimefilters %}
+          <option value="{{dtf}}">{{dtf}}</option>
+          {% endfor %}
+      </select>
+      <label>Choose a domain name to filter:</label>
+      <select id="domainnamefilter" name="domainnamefilter">
+          {% for dmn in domainnamefilters %}
+          <option value="{{dmn}}">{{dmn}}</option>
+          {% endfor %}
+      </select>
+      <input type="submit" value="Update">
+  </form>
+  <p id="ASN-ROUTE">--</p>
+  <br>  
+
+    <div id="map" class="map"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+    function getData() { 
+      return $.ajax({
+        type: "POST",
+        url: "/traceroute/traceData",
+        data: { 'csrfmiddlewaretoken':"{{ csrf_token }}",
+        'datetimefilter': $("#datetimefilter").val(),
+        'domainnamefilter': $("#domainnamefilter").val() 
+      }
+      });
+    };
+
+    var mapv =  undefined
+    async function loadMap()
+    {
+      let payload = await getData()
+      let routeText = ''
+
+
+      for (let i = 0; i <  payload.data.length; i++) 
+      {
+        if (payload.data[i].asn === "none"){continue}
+
+        if (i != 0){
+          routeText += " -> "
+        }
+        routeText += payload.data[i].asn + "(" + payload.data[i].cc +")"
+      }
+  
+      $('#ASN-ROUTE').text(routeText)
+
+
+      var fill = new ol.style.Fill({
+         color: '#fc9595',
+      });
+
+      var stroke = new ol.style.Stroke({
+         color: '#ff0000',
+         width: 3
+      });
+
+      var circleStyle = new ol.style.Style({
+        image: new ol.style.Circle({
+          fill: fill,
+          stroke: stroke,
+          radius: 7
+        })
+      });
+
+      let pointsLL = []
+      let features = []
+      payload.data.forEach(el =>
+      {
+        let ll = ol.proj.fromLonLat([el.ll,el.lt]);
+        pointsLL.push(ll)
+        const p = new ol.Feature({geometry: new ol.geom.Point(ll), });
+        p.setStyle(circleStyle)
+        features.push(p)
+      });
+
+      const line = new ol.geom.LineString(pointsLL);
+
+      const lineFeature = new ol.Feature({
+        geometry: line,
+        name: 'myLine'
+      });
+
+      lineFeature.setStyle(
+        new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: '#ff0000',
+            width: 3,
+          }),
+        }),
+      );
+
+      features.push(lineFeature)
+
+      const vectorSource = new ol.source.Vector({
+        features: features,
+      });
+
+      const vectorLayer = new ol.layer.Vector({
+        source: vectorSource,
+      });
+
+      const rasterLayer = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+
+      if(typeof mapv !== 'undefined')
+      {
+        const layers = [...mapv.getLayers().getArray()]
+        layers.forEach((layer) => mapv.removeLayer(layer))
+
+        mapv.addLayer(rasterLayer)
+        mapv.addLayer(vectorLayer)
+
+        mapv.changed()
+        mapv.render()
+
+      }else{
+        mapv = new ol.Map({
+          target: 'map',
+          layers: [rasterLayer, vectorLayer],
+          view: new ol.View({
+            center: ol.proj.fromLonLat([10.0, 50.0]),
+            zoom: 4
+          })
+        });
+      }
+    
+    }
+
+    $(document).ready(function () {
+        loadMap();    
+      });
+    </script>
+  </body>
+</html>

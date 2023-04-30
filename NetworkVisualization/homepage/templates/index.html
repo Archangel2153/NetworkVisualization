@@ -1,0 +1,95 @@
+{% load static %}
+<!-- {% include "base.html" %} -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Network Visualization | Home</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/home_stylesheet.css' %}">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<style>
+		body,h1,h2,h3,h4,h5,h6 {
+			font-family: "Lato", sans-serif
+		}
+		.bar,h1,button {
+			font-family: "Montserrat", sans-serif
+		}
+	</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header" style="padding:128px 16px; background-image: url({% static 'images/banner.jpg' %});">
+  <h1 class="margin" style="font-size: 55px">NETWORK TOPOLOGY <br> VISUALIZATION</h1>
+  <p style="font-size: 24px">
+		Group 4 | Advanced Network Security 2021 <br>
+  </p>
+  <p style="font-size: 18px">
+	  Michel de Boer - s1011542 <br>
+	  Lorenzo Casini - s1062069 <br>
+	  Onno de Gouw - s1025613 <br>
+	  Stefan Popa - s1027672
+  </p>
+    <a href="{% url 'ping' %}"><button class="button black padding-large margin-top" style="font-size: 18px">Get Started!</button></a>
+</header>
+
+<!-- First Grid -->
+<div class="row-padding padding-64 container">
+  <div class="content">
+    <div class="twothird">
+      <h1>The project</h1>
+      <h5 class="padding-16">Within this project, the goal is to measure and visualize the network topology for a selected set of host nodes. This way the idea is to get a good overview and understanding of how ASes are connected to each other and how routing agreements influence the paths network traffic takes from source to destination.</h5>
+      <p class="text-grey">In order to achieve this goal, we make use of the tools <a href="https://en.wikipedia.org/wiki/Ping_(networking_utility)" style="color: inherit;">ping</a> and <a href="https://en.wikipedia.org/wiki/Traceroute" style="color: inherit;">traceroute</a>, which we run with a certain list of hosts to collect our data. Afterwards, we use the libraries <a href="https://www.chartjs.org/" style="color: inherit;">Chart.js</a> and <a href="https://openlayers.org/" style="color: inherit;">OpenLayers</a> in order to visualize the gathered data. We learn how the standardized exterior protocol of BGP - the Border Gateway Protocol - exchanges routing and reachability information among autonomous systems on the Internet.</p>
+    </div>
+
+    <div class="third center connectivity-image">
+	  <image style="width:220px;" src="{% static 'images/connectivity.png' %}" alt="Connectivity Icon"/>
+    </div>
+  </div>
+</div>
+
+<!-- Second Grid -->
+<div class="row-padding light-grey padding-64 container">
+  <div class="content">
+    <div class="third center graph-image">
+      <image src="{% static 'images/graph.png' %}" alt="Graph Icon"/>
+    </div>
+
+    <div class="twothird">
+      <h1>How to run it</h1>
+      <h5 class="padding-16">
+        <ol style="padding-left:18px;">
+            <li>Clone the repository: <code>git clone repository-name</code></li>
+            <li>Install requirements: <code>pip3 install requirments.txt</code></li>
+            <li>Two things need to run at the same time: </li>
+            <ol start="4">
+                <li>To run the server: <code>python3 manage.py runserver</code></li>
+                <li>To run the background tasks: <br>
+                    <ul>
+                        <li> <code>python3 manage.py makemigrations </code> </li>
+                        <li> <code>python3 manage.py migrate --run-syncdb </code> </li>
+                        <li> <code>python3 manage.py process_tasks </code> </li>
+                    </ul>
+                </li>
+            </ol>
+       </ol>
+      </h5>
+
+      <p class="text-grey">By running the commands mentioned above, this project will run and you will be able to use the different features it provides. Please click the 'Get Started!' button in order to direct to the pages for data collection - the ping and traceroute - or the pages for data visualization - showing in charts, graphs and on a map. The interface of the different features should be intuitive enough to understand how you are able to use them without any additional explanation. <br> Have fun watching the different data and playing around with our network visualization tool!</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- Footer -->
+<footer>
+<div class="container black center opacity padding-48">
+    <h1 class="margin" style="font-size: 26px">Radboud University <br> Master Cyber Security | ANS 2021</h1>
+</div>
+</footer>
+
+</body>
+</html>

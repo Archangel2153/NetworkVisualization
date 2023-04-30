@@ -1,0 +1,6 @@
+aslookup==1.2.0
+Django==3.2.9
+django_background_tasks==1.2.5
+icmplib==3.0.1
+ipinfo==4.2.1
+tqdm==4.57.0
